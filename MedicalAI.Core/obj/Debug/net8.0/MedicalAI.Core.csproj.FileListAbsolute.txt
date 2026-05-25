@@ -9,3 +9,4 @@ D:\DA\MedicalAI.Core\obj\Debug\net8.0\MedicalAI.Core.dll
 D:\DA\MedicalAI.Core\obj\Debug\net8.0\refint\MedicalAI.Core.dll
 D:\DA\MedicalAI.Core\obj\Debug\net8.0\MedicalAI.Core.pdb
 D:\DA\MedicalAI.Core\obj\Debug\net8.0\ref\MedicalAI.Core.dll
+D:\DA\MedicalAI.Core\obj\Debug\net8.0\MedicalAI.Core.sourcelink.json

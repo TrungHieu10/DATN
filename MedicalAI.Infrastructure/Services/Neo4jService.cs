@@ -30,21 +30,22 @@ namespace MedicalAI.Infrastructure.Services
         }
 
         /// <summary>
-        /// Lấy lời khuyên dựa trên bệnh và mức độ rủi ro
+        /// Lấy lời khuyên dựa trên chỉ số y tế có giá trị cao
+        /// Query: Indicator -[:INDICATES_RISK_OF]-> Disease -[:HAS_ADVICE_FOR]-> Advice
         /// </summary>
         public async Task<List<string>> GetAdviceByRiskLevelAsync(string disease, double riskScore)
         {
             try
             {
+                // Tìm disease theo tên Vietnamese
                 var query = @"
-                    MATCH (d:Disease {name: $disease}) -[:HAS_ADVICE]-> (a:Advice)
-                    WHERE a.minRisk <= $riskScore AND a.maxRisk >= $riskScore
-                    RETURN a.content as advice
-                    ORDER BY a.priority DESC
+                    MATCH (d:Disease {name: $disease})
+                    MATCH (d)-[:HAS_ADVICE_FOR]->(a:Advice)
+                    RETURN DISTINCT a.content as advice
                     LIMIT 5
                 ";
 
-                var result = await _session.RunAsync(query, new { disease, riskScore });
+                var result = await _session.RunAsync(query, new { disease });
                 var records = await result.ToListAsync();
 
                 return records.Select(r => r["advice"].As<string>()).ToList();
@@ -57,23 +58,25 @@ namespace MedicalAI.Infrastructure.Services
         }
 
         /// <summary>
-        /// Lấy mẹo phòng chống bệnh
+        /// Lấy các chỉ số liên quan đến bệnh
         /// </summary>
         public async Task<List<string>> GetPreventionTipsAsync(string disease)
         {
             try
             {
+                // Tìm các Indicator liên quan tới bệnh
                 var query = @"
-                    MATCH (d:Disease {name: $disease}) -[:HAS_PREVENTION]-> (p:Prevention)
-                    RETURN p.content as tip
-                    ORDER BY p.priority DESC
-                    LIMIT 5
+                    MATCH (i:Indicator)-[:INDICATES_RISK_OF]->(d:Disease {name: $disease})
+                    RETURN DISTINCT i.label as indicator, i.name as indicatorName
+                    LIMIT 10
                 ";
 
                 var result = await _session.RunAsync(query, new { disease });
                 var records = await result.ToListAsync();
 
-                return records.Select(r => r["tip"].As<string>()).ToList();
+                return records.Select(r => 
+                    $"Kiểm soát {r["indicator"].As<string>()} ({r["indicatorName"].As<string>()})"
+                ).ToList();
             }
             catch (Exception ex)
             {
@@ -83,23 +86,25 @@ namespace MedicalAI.Infrastructure.Services
         }
 
         /// <summary>
-        /// Lấy khuyến nghị lối sống dựa trên các yếu tố nguy hiểm
+        /// Lấy các bệnh liên quan (complications)
         /// </summary>
         public async Task<List<string>> GetLifestyleRecommendationsAsync(List<string> riskFactors)
         {
             try
             {
+                // Tìm bệnh có complication với bệnh chính
                 var query = @"
-                    MATCH (rf:RiskFactor) -[:HAS_LIFESTYLE_RECOMMENDATION]-> (lr:LifestyleRecommendation)
-                    WHERE rf.name IN $riskFactors
-                    RETURN DISTINCT lr.content as recommendation
+                    MATCH (d:Disease)-[:COMPLICATION_OF]->(related:Disease)
+                    RETURN DISTINCT related.name as relatedDisease
                     LIMIT 10
                 ";
 
-                var result = await _session.RunAsync(query, new { riskFactors });
+                var result = await _session.RunAsync(query);
                 var records = await result.ToListAsync();
 
-                return records.Select(r => r["recommendation"].As<string>()).ToList();
+                return records.Select(r => 
+                    $"⚠️ Cảnh báo: Có nguy cơ {r["relatedDisease"].As<string>()}"
+                ).ToList();
             }
             catch (Exception ex)
             {

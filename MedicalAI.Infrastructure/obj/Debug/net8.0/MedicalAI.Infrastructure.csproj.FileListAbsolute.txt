@@ -13,3 +13,4 @@ D:\DA\MedicalAI.Infrastructure\obj\Debug\net8.0\MedicalAI.Infrastructure.dll
 D:\DA\MedicalAI.Infrastructure\obj\Debug\net8.0\refint\MedicalAI.Infrastructure.dll
 D:\DA\MedicalAI.Infrastructure\obj\Debug\net8.0\MedicalAI.Infrastructure.pdb
 D:\DA\MedicalAI.Infrastructure\obj\Debug\net8.0\ref\MedicalAI.Infrastructure.dll
+D:\DA\MedicalAI.Infrastructure\obj\Debug\net8.0\MedicalAI.Infrastructure.sourcelink.json

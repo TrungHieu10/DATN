@@ -227,6 +227,10 @@
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
               "version": "[8.0.*, )"
+            },
+            "Neo4j.Driver": {
+              "target": "Package",
+              "version": "[6.1.2, )"
             }
           },
           "imports": [

@@ -1,4 +1,5 @@
 using MedicalAI.Infrastructure.Data;
+using MedicalAI.Infrastructure;
 using MedicalAI.Core.Interfaces;
 using MedicalAI.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClinicalService, ClinicalService>();
+
+// NEO4J RAG SERVICES
+if (builder.Configuration.GetValue<bool>("Neo4j:Enabled"))
+{
+    builder.Services.AddNeo4jRagServices(
+        neo4jUri: builder.Configuration["Neo4j:Uri"],
+        neo4jUsername: builder.Configuration["Neo4j:Username"],
+        neo4jPassword: builder.Configuration["Neo4j:Password"]
+    );
+}
+
+builder.Services.AddScoped<IClinicalServiceWithRAG, ClinicalServiceWithRAG>();
 builder.Services.AddHttpClient<IAIPredictionClient, AIPredictionClient>(client =>
 {
     client.BaseAddress = new Uri("http://127.0.0.1:8000"); 
@@ -38,6 +51,15 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
+});
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", p =>
+        p.AllowAnyOrigin()
+         .AllowAnyMethod()
+         .AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
@@ -78,6 +100,20 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+// Initialize Neo4j Knowledge Graph
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        await scope.ServiceProvider.InitializeNeo4jKnowledgeGraphAsync();
+        Console.WriteLine("✅ Neo4j Knowledge Graph initialized");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Neo4j initialization: {ex.Message}");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -86,6 +122,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
 
 app.UseAuthentication(); 
 app.UseAuthorization();

@@ -8,37 +8,37 @@ namespace MedicalAI.Core.DTOs
     /// </summary>
     public class AIPredictionDetailDTO
     {
-        public string CheckupId { get; set; }
+        public string CheckupId { get; set; } = "";
         public DateTime CreatedAt { get; set; }
         
         // Dự đoán chính
-        public List<DiseaseRiskDTO> Predictions { get; set; }
-        public string RiskLevel { get; set; } // Low, Medium, High, Very High
+        public List<DiseaseRiskDTO> Predictions { get; set; } = new();
+        public string RiskLevel { get; set; } = ""; // Low, Medium, High, Very High
         public double RiskScore { get; set; } // 0-1
 
         // SHAP Explainability
-        public List<ShapValueDTO> ShapValues { get; set; }
+        public List<ShapValueDTO> ShapValues { get; set; } = new();
 
         // RAG-generated advice
-        public List<string> Advice { get; set; }
-        public List<string> PreventionTips { get; set; }
-        public List<string> LifestyleRecommendations { get; set; }
+        public List<string> Advice { get; set; } = new();
+        public List<string> PreventionTips { get; set; } = new();
+        public List<string> LifestyleRecommendations { get; set; } = new();
 
         // Raw metrics for reference
-        public HealthMetricsDTO Metrics { get; set; }
+        public HealthMetricsDTO Metrics { get; set; } = new();
     }
 
     public class DiseaseRiskDTO
     {
-        public string Disease { get; set; }
-        public string Description { get; set; }
+        public string Disease { get; set; } = "";
+        public string Description { get; set; } = "";
         public double Probability { get; set; } // 0-1
-        public string ICD10Code { get; set; }
+        public string ICD10Code { get; set; } = "";
     }
 
     public class ShapValueDTO
     {
-        public string FeatureName { get; set; }
+        public string FeatureName { get; set; } = "";
         public double ShapValue { get; set; }
         public double BaseValue { get; set; }
         public int Index { get; set; }
@@ -64,7 +64,7 @@ namespace MedicalAI.Core.DTOs
         public double SleepHours { get; set; }
         public double ExerciseMinutes { get; set; }
         public double StressLevel { get; set; }
-        public string SmokingStatus { get; set; }
+        public string SmokingStatus { get; set; } = "";
         public double AlcoholConsumption { get; set; }
         public double FruitsVegetablesServings { get; set; }
     }
